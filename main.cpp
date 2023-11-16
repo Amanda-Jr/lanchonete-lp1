@@ -133,7 +133,7 @@ int main()
 
   while (existe_cliente)
   {
-    cout<<"Cliente "<<cont_clientes<<endl;
+    cout<<"\nCliente "<<cont_clientes<<endl;
     exibir_cardapio(cardapio);
     // Pedir pedido
 
