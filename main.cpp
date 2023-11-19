@@ -139,18 +139,29 @@ void exibirCardapioDescritor(Prato **cardapio, int lin, int col)
   }
 }
 
-void adicionarPedidoNaLista(ListaPedidos *lista, Nofila *pedido)
-{
+//Amanda mexendo aqui
+void adicionarPedidoNaLista(ListaPedidos *lista, Prato ** cardapio, int cont_clientes){
+  Nofila *Nopedido = new Nofila;
+  int item;
+  cout<<"Quantos itens deseja pedir?"<<endl;
+  cin >> item;
+
+  for(int i=0; i<item; i++){
+    cout<<"Qual o número do "<<i+1<<"° item do seu pedido?";
+    Nopedido->pedido.pratos = cardapio[i];
+    Nopedido->pedido.id = cont_clientes;
+  }
+  
   if (lista->inicio == NULL)
   {
-    lista->inicio = pedido;
-    lista->fim = pedido;
+    lista->inicio = Nopedido;
+    lista->fim = Nopedido;
   }
   else
   {
-    lista->fim->prox = pedido;
-    pedido->ant = lista->fim;
-    lista->fim = pedido;
+    lista->fim->prox = Nopedido;
+    Nopedido->ant = lista->fim;
+    lista->fim = Nopedido;
   }
 }
 
@@ -185,6 +196,8 @@ int main()
     // Pedir pedido 
     Pedido novoPedido;
     enfileirar(filaPedidos, novoPedido);
+
+    adicionarPedidoNaLista(listaPedidos, cardapio, cont_clientes);
 
     string confirm_cliente;
     cout<<"Ainda há cliente? (S/N):";
