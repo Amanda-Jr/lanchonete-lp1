@@ -148,7 +148,6 @@ void exibirCardapioDescritor(Prato **cardapio, int lin, int col)
   }
 }
 
-//Amanda mexendo aqui
 void adicionarPedidoNaLista(ListaPedidos *lista, Prato ** cardapio, int cont_clientes){
   Nofila *Nopedido = new Nofila;
   int item;
@@ -157,8 +156,10 @@ void adicionarPedidoNaLista(ListaPedidos *lista, Prato ** cardapio, int cont_cli
 
 
   for(int i=0; i<item; i++){
+    int id_item;
     cout<<"Qual o número do "<<i+1<<"° item do seu pedido? ";
-    Nopedido->pedido.pratos = cardapio[i];
+    cin >> id_item;
+    Nopedido->pedido.pratos = cardapio[id_item];
     Nopedido->pedido.id = cont_clientes;
     Nopedido->ant = NULL;
     Nopedido->prox = NULL;
