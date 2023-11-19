@@ -44,6 +44,15 @@ Fila *criarFila()
   return f;
 }
 
+ListaPedidos *criarLista()
+{
+  ListaPedidos *LP = new ListaPedidos;
+  LP->inicio = NULL;
+  LP->fim = NULL;
+
+  return LP;
+}
+
 void enfileirar(Fila *f, Pedido pedido)
 {
   Nofila *novo = new Nofila;
@@ -146,23 +155,27 @@ void adicionarPedidoNaLista(ListaPedidos *lista, Prato ** cardapio, int cont_cli
   cout<<"Quantos itens deseja pedir?"<<endl;
   cin >> item;
 
+
   for(int i=0; i<item; i++){
-    cout<<"Qual o número do "<<i+1<<"° item do seu pedido?";
+    cout<<"Qual o número do "<<i+1<<"° item do seu pedido? ";
     Nopedido->pedido.pratos = cardapio[i];
     Nopedido->pedido.id = cont_clientes;
+    Nopedido->ant = NULL;
+    Nopedido->prox = NULL;
+
+    if (lista->inicio == NULL)
+    {
+      lista->inicio = Nopedido;
+      lista->fim = Nopedido;
+    }
+    else
+    {
+      Nopedido->ant = lista->fim;
+      lista->fim->prox = Nopedido;
+      lista->fim = Nopedido;
+    }
   }
   
-  if (lista->inicio == NULL)
-  {
-    lista->inicio = Nopedido;
-    lista->fim = Nopedido;
-  }
-  else
-  {
-    lista->fim->prox = Nopedido;
-    Nopedido->ant = lista->fim;
-    lista->fim = Nopedido;
-  }
 }
 
 void exibirPedidosNaLista(ListaPedidos *lista)
@@ -184,6 +197,7 @@ int main()
   popular_cardapio(cardapio);
 
   Fila *filaPedidos = criarFila();
+  ListaPedidos *LP = criarLista();
   ListaPedidos *listaPedidos = new ListaPedidos;
 
   cout<<"-----Sistema para Lanchonete-----";
@@ -197,7 +211,7 @@ int main()
     Pedido novoPedido;
     enfileirar(filaPedidos, novoPedido);
 
-    adicionarPedidoNaLista(listaPedidos, cardapio, cont_clientes);
+    adicionarPedidoNaLista(LP, cardapio, cont_clientes);
 
     string confirm_cliente;
     cout<<"Ainda há cliente? (S/N):";
@@ -208,7 +222,7 @@ int main()
     }
     cont_clientes++;
   }
-  cout<<"Os pedidos estão sendo preparados!" << endl;
+  cout<<"\nOs pedidos estão sendo preparados!" << endl;
   // Avisar que os pedidos estão prontos de acordo com a lista
   cout << "Pedidos na Lista:" << endl;
   exibirPedidosNaLista(listaPedidos);
