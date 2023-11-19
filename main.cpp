@@ -1,5 +1,4 @@
 #include <iostream>
-
 using namespace std;
 
 struct Prato
@@ -19,6 +18,7 @@ struct Nofila
 {
   Pedido pedido;
   Nofila *prox;
+  Nofila *ant;
 };
 
 struct Fila
@@ -27,7 +27,15 @@ struct Fila
   Nofila *fim;
 };
 
-Fila *criar_fila()
+struct ListaPedidos
+{
+  Nofila *inicio;
+  Nofila *fim;
+};
+
+
+
+Fila *criarFila()
 {
   Fila *f = new Fila;
   f->ini = NULL;
@@ -41,6 +49,8 @@ void enfileirar(Fila *f, Pedido pedido)
   Nofila *novo = new Nofila;
   novo->pedido = pedido;
   novo->prox = NULL;
+  novo->ant = f->fim;
+
   if (f->ini == NULL)
   {
     f->ini = novo;
@@ -63,6 +73,13 @@ Nofila* desenfileirar(Fila* f) {
 
     return p;
   }
+  else {
+    Nofila *p = f->ini;
+    f->ini = f->ini->prox;
+    f->ini->ant = NULL;
+    return p;
+  }
+
 }
 
 Prato **criar_cardapio(int lin, int col)
@@ -110,17 +127,43 @@ void popular_cardapio(Prato** cardapio) {
   
 }
 
-void exibir_cardapio(Prato** cardapio) {
-  for (int i = 0; i < 2; i++)
+// Função com descritor para exibir o cardápio
+void exibirCardapioDescritor(Prato **cardapio, int lin, int col)
+{
+  for (int i = 0; i < lin; i++)
   {
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < col; j++)
     {
-      cout<<cardapio[i][j].id<<" - "<<cardapio[i][j].nome<<" | "<<"R$ "<<cardapio[i][j].preco<<endl;
+      cout << cardapio[i][j].id << " - " << cardapio[i][j].nome << " | " << "R$ " << cardapio[i][j].preco << endl;
     }
-    
   }
-  
 }
+
+void adicionarPedidoNaLista(ListaPedidos *lista, Nofila *pedido)
+{
+  if (lista->inicio == NULL)
+  {
+    lista->inicio = pedido;
+    lista->fim = pedido;
+  }
+  else
+  {
+    lista->fim->prox = pedido;
+    pedido->ant = lista->fim;
+    lista->fim = pedido;
+  }
+}
+
+void exibirPedidosNaLista(ListaPedidos *lista)
+{
+  Nofila *atual = lista->inicio;
+  while (atual != NULL)
+  {
+    cout << "Pedido: " << atual->pedido.id << endl;
+    atual = atual->prox;
+  }
+}
+
 
 int main()
 {
@@ -129,13 +172,19 @@ int main()
   Prato** cardapio = criar_cardapio(2, 4);
   popular_cardapio(cardapio);
 
+  Fila *filaPedidos = criarFila();
+  ListaPedidos *listaPedidos = new ListaPedidos;
+
   cout<<"-----Sistema para Lanchonete-----";
 
   while (existe_cliente)
   {
     cout<<"\nCliente "<<cont_clientes<<endl;
-    exibir_cardapio(cardapio);
-    // Pedir pedido
+    exibirCardapioDescritor(cardapio, 2, 4);
+
+    // Pedir pedido 
+    Pedido novoPedido;
+    enfileirar(filaPedidos, novoPedido);
 
     string confirm_cliente;
     cout<<"Ainda há cliente? (S/N):";
@@ -144,9 +193,12 @@ int main()
     if(confirm_cliente != "S" && confirm_cliente != "s") {
       existe_cliente = false;
     }
+    cont_clientes++;
   }
-  cout<<"Os pedidos estão sendo preparados!";
+  cout<<"Os pedidos estão sendo preparados!" << endl;
   // Avisar que os pedidos estão prontos de acordo com a lista
+  cout << "Pedidos na Lista:" << endl;
+  exibirPedidosNaLista(listaPedidos);
 
   system("pause");
 
