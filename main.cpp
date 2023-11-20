@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 using namespace std;
 
 struct Prato
@@ -11,7 +12,9 @@ struct Prato
 struct Pedido
 {
   string id;
-  Prato *pratos;
+  int **pratos;
+  int *quantidades;
+  int num_pratos;
 };
 
 struct Nofila
@@ -148,46 +151,85 @@ void exibirCardapioDescritor(Prato **cardapio, int lin, int col)
   }
 }
 
+double calcularTotalPedido(Prato **cardapio, Pedido pedido)
+{
+  double total = 0;
+  for (int i = 0; i < pedido.num_pratos; i++)
+  {
+    int id_prato = pedido.pratos[i][0];
+    int quantidade = pedido.pratos[i][1];
+    total += cardapio[id_prato / 10][id_prato % 10].preco * quantidade;
+  }
+  return total;
+}
+
+void exibirPedidoComTotal(Prato **cardapio, Pedido pedido)
+{
+  cout << "Pedido #" << pedido.id << ":" << endl;
+  for (int i = 0; i < pedido.num_pratos; i++)
+  {
+    int id_prato = pedido.pratos[i][0];
+    int quantidade = pedido.pratos[i][1];
+    cout << cardapio[id_prato / 10][id_prato % 10].nome << " | R$ " << cardapio[id_prato / 10][id_prato % 10].preco << " x " << quantidade << endl;
+  }
+  cout << "Total: R$ " << calcularTotalPedido(cardapio, pedido) << endl;
+}
+
+
+
 void adicionarPedidoNaLista(ListaPedidos *lista, Prato ** cardapio, int cont_clientes){
   Nofila *Nopedido = new Nofila;
   int item;
   cout<<"Quantos itens deseja pedir?"<<endl;
   cin >> item;
 
+  Nopedido->pedido.num_pratos = item;
+  Nopedido->pedido.pratos = new int *[item];
+  Nopedido->pedido.quantidades = new int[item];
 
-  for(int i=0; i<item; i++){
+  for (int i = 0; i < item; i++)
+  {
     int id_item;
-    cout<<"Qual o número do "<<i+1<<"° item do seu pedido? ";
+    int quantidade;
+    cout << "Qual o número do " << i + 1 << "° item do seu pedido? ";
     cin >> id_item;
-    Nopedido->pedido.pratos = cardapio[id_item];
-    Nopedido->pedido.id = cont_clientes;
-    Nopedido->ant = NULL;
-    Nopedido->prox = NULL;
+    cout << "Quantidade desejada: ";
+    cin >> quantidade;
 
-    if (lista->inicio == NULL)
-    {
-      lista->inicio = Nopedido;
-      lista->fim = Nopedido;
-    }
-    else
-    {
-      Nopedido->ant = lista->fim;
-      lista->fim->prox = Nopedido;
-      lista->fim = Nopedido;
-    }
+    Nopedido->pedido.pratos[i] = new int[2];
+    Nopedido->pedido.pratos[i][0] = id_item-1;
+    Nopedido->pedido.pratos[i][1] = quantidade;
   }
+
+  Nopedido->pedido.id = cont_clientes;
+  Nopedido->ant = NULL;
+  Nopedido->prox = NULL;
+
+  if (lista->inicio == NULL)
+  {
+    lista->inicio = Nopedido;
+    lista->fim = Nopedido;
+  }
+  else
+  {
+    Nopedido->ant = lista->fim;
+    lista->fim->prox = Nopedido;
+    lista->fim = Nopedido;
+  }
+
   
 }
 
-void exibirPedidosNaLista(ListaPedidos *lista)
+void exibirPedidosNaLista(ListaPedidos *lista, Prato **cardapio)
 {
   Nofila *atual = lista->inicio;
   while (atual != NULL)
   {
-    cout << "Pedido: " << atual->pedido.id << endl;
+    exibirPedidoComTotal(cardapio, atual->pedido);
     atual = atual->prox;
   }
 }
+
 
 
 int main()
@@ -202,6 +244,9 @@ int main()
   ListaPedidos *listaPedidos = new ListaPedidos;
 
   cout<<"-----Sistema para Lanchonete-----";
+   system("color 01");
+  cout<< endl << endl <<"------------------------------------------------------------------------------------"<< endl <<"Seja bem-vindo a lanchonete DEZliciosa, delicias que encantam o seu paladar e o seu bolso." << endl<< "------------------------------------------------------------------------------------";
+
 
   while (existe_cliente)
   {
@@ -226,7 +271,27 @@ int main()
   cout<<"\nOs pedidos estão sendo preparados!" << endl;
   // Avisar que os pedidos estão prontos de acordo com a lista
   cout << "Pedidos na Lista:" << endl;
-  exibirPedidosNaLista(listaPedidos);
+  exibirPedidosNaLista(listaPedidos, cardapio);
+
+   // Liberar memória alocada para os pratos dos pedidos
+  Nofila *atual = LP->inicio;
+  while (atual != NULL)
+  {
+    for (int i = 0; i < atual->pedido.num_pratos; i++)
+    {
+      delete[] atual->pedido.pratos[i];
+    }
+    delete[] atual->pedido.pratos;
+    delete[] atual->pedido.quantidades;
+    atual = atual->prox;
+  }
+  system("color 01");
+  cout<< "Obrigada por comprar na nossa lanchonete, esperamos que tenha tido uma boa experiência,  volte sempre!";
+  delete LP;            // Liberar memória da lista de pedidos
+  delete[] cardapio[0]; // Liberar memória do cardápio
+  delete[] cardapio[1];
+  delete[] cardapio;
+
 
   system("pause");
 
