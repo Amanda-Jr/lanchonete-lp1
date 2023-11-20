@@ -241,7 +241,6 @@ int main()
 
   Fila *filaPedidos = criarFila();
   ListaPedidos *LP = criarLista();
-  ListaPedidos *listaPedidos = new ListaPedidos;
 
   cout<<"-----Sistema para Lanchonete-----";
    system("color 01");
@@ -271,7 +270,7 @@ int main()
   cout<<"\nOs pedidos estão sendo preparados!" << endl;
   // Avisar que os pedidos estão prontos de acordo com a lista
   cout << "Pedidos na Lista:" << endl;
-  exibirPedidosNaLista(listaPedidos, cardapio);
+  exibirPedidosNaLista(LP, cardapio);
 
    // Liberar memória alocada para os pratos dos pedidos
   Nofila *atual = LP->inicio;
