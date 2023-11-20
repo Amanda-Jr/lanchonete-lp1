@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <stdlib.h>
 using namespace std;
 
 struct Prato
@@ -11,14 +11,17 @@ struct Prato
 
 struct Pedido
 {
-  string id;
-  Prato *pratos;
+  int id;
+  int **pratos;
+  int *quantidades;
+  int num_pratos;
 };
 
 struct Nofila
 {
   Pedido pedido;
   Nofila *prox;
+  Nofila *ant;
 };
 
 struct Fila
@@ -27,7 +30,15 @@ struct Fila
   Nofila *fim;
 };
 
-Fila *criar_fila()
+struct ListaPedidos
+{
+  Nofila *inicio;
+  Nofila *fim;
+};
+
+
+
+Fila *criarFila()
 {
   Fila *f = new Fila;
   f->ini = NULL;
@@ -36,11 +47,22 @@ Fila *criar_fila()
   return f;
 }
 
+ListaPedidos *criarLista()
+{
+  ListaPedidos *LP = new ListaPedidos;
+  LP->inicio = NULL;
+  LP->fim = NULL;
+
+  return LP;
+}
+
 void enfileirar(Fila *f, Pedido pedido)
 {
   Nofila *novo = new Nofila;
   novo->pedido = pedido;
   novo->prox = NULL;
+  novo->ant = f->fim;
+
   if (f->ini == NULL)
   {
     f->ini = novo;
@@ -63,6 +85,13 @@ Nofila* desenfileirar(Fila* f) {
 
     return p;
   }
+  else {
+    Nofila *p = f->ini;
+    f->ini = f->ini->prox;
+    f->ini->ant = NULL;
+    return p;
+  }
+
 }
 
 Prato **criar_cardapio(int lin, int col)
@@ -110,17 +139,98 @@ void popular_cardapio(Prato** cardapio) {
   
 }
 
-void exibir_cardapio(Prato** cardapio) {
-  for (int i = 0; i < 2; i++)
+// Função com descritor para exibir o cardápio
+void exibirCardapioDescritor(Prato **cardapio, int lin, int col)
+{
+  for (int i = 0; i < lin; i++)
   {
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < col; j++)
     {
-      cout<<cardapio[i][j].id<<" - "<<cardapio[i][j].nome<<" | "<<"R$ "<<cardapio[i][j].preco<<endl;
+      cout << cardapio[i][j].id << " - " << cardapio[i][j].nome << " | " << "R$ " << cardapio[i][j].preco << endl;
     }
-    
   }
+}
+
+double calcularTotalPedido(Prato **cardapio, Pedido pedido)
+{
+  double total = 0;
+  for (int i = 0; i < pedido.num_pratos; i++)
+  {
+    int id_prato = pedido.pratos[i][0];
+    int quantidade = pedido.pratos[i][1];
+    total += cardapio[id_prato / 10][id_prato % 10].preco * quantidade;
+  }
+  return total;
+}
+
+void exibirPedidoComTotal(Prato **cardapio, Pedido pedido)
+{
+  cout << "Pedido #" << pedido.id << ":" << endl;
+  for (int i = 0; i < pedido.num_pratos; i++)
+  {
+    int id_prato = pedido.pratos[i][0];
+    int quantidade = pedido.pratos[i][1];
+    cout << cardapio[id_prato / 10][id_prato % 10].nome << " | R$ " << cardapio[id_prato / 10][id_prato % 10].preco << " x " << quantidade << endl;
+  }
+  cout << "Total: R$ " << calcularTotalPedido(cardapio, pedido) << endl;
+}
+
+
+
+void adicionarPedidoNaLista(ListaPedidos *lista, Prato ** cardapio, int cont_clientes){
+  Nofila *Nopedido = new Nofila;
+  int item;
+  cout<<"Quantos itens deseja pedir?"<<endl;
+  cin >> item;
+
+  Nopedido->pedido.num_pratos = item;
+  Nopedido->pedido.pratos = new int *[item];
+  Nopedido->pedido.quantidades = new int[item];
+
+  for (int i = 0; i < item; i++)
+  {
+    int id_item;
+    int quantidade;
+    cout << "Qual o número do " << i + 1 << "° item do seu pedido? ";
+    cin >> id_item;
+    cout << "Quantidade desejada: ";
+    cin >> quantidade;
+
+    Nopedido->pedido.pratos[i] = new int[2];
+    Nopedido->pedido.pratos[i][0] = id_item-1;
+    Nopedido->pedido.pratos[i][1] = quantidade;
+  }
+
+  Nopedido->pedido.id = cont_clientes;
+  Nopedido->ant = NULL;
+  Nopedido->prox = NULL;
+
+  if (lista->inicio == NULL)
+  {
+    lista->inicio = Nopedido;
+    lista->fim = Nopedido;
+  }
+  else
+  {
+    Nopedido->ant = lista->fim;
+    lista->fim->prox = Nopedido;
+    lista->fim = Nopedido;
+  }
+
   
 }
+
+void exibirPedidosNaLista(ListaPedidos *lista, Prato **cardapio)
+{
+  Nofila *atual = lista->inicio;
+  while (atual != NULL)
+  {
+    exibirPedidoComTotal(cardapio, atual->pedido);
+    atual = atual->prox;
+  }
+}
+
+
 
 int main()
 {
@@ -129,13 +239,24 @@ int main()
   Prato** cardapio = criar_cardapio(2, 4);
   popular_cardapio(cardapio);
 
+  Fila *filaPedidos = criarFila();
+  ListaPedidos *LP = criarLista();
+
   cout<<"-----Sistema para Lanchonete-----";
+   system("color 01");
+  cout<< endl << endl <<"------------------------------------------------------------------------------------"<< endl <<"Seja bem-vindo a lanchonete DEZliciosa, delicias que encantam o seu paladar e o seu bolso." << endl<< "------------------------------------------------------------------------------------";
+
 
   while (existe_cliente)
   {
-    cout<<"Cliente "<<cont_clientes<<endl;
-    exibir_cardapio(cardapio);
-    // Pedir pedido
+    cout<<"\nCliente "<<cont_clientes<<endl;
+    exibirCardapioDescritor(cardapio, 2, 4);
+
+    // Pedir pedido 
+    Pedido novoPedido;
+    enfileirar(filaPedidos, novoPedido);
+
+    adicionarPedidoNaLista(LP, cardapio, cont_clientes);
 
     string confirm_cliente;
     cout<<"Ainda há cliente? (S/N):";
@@ -144,9 +265,32 @@ int main()
     if(confirm_cliente != "S" && confirm_cliente != "s") {
       existe_cliente = false;
     }
+    cont_clientes++;
   }
-  cout<<"Os pedidos estão sendo preparados!";
+  cout<<"\nOs pedidos estão sendo preparados!" << endl;
   // Avisar que os pedidos estão prontos de acordo com a lista
+  cout << "Pedidos na Lista:" << endl;
+  exibirPedidosNaLista(LP, cardapio);
+
+   // Liberar memória alocada para os pratos dos pedidos
+  Nofila *atual = LP->inicio;
+  while (atual != NULL)
+  {
+    for (int i = 0; i < atual->pedido.num_pratos; i++)
+    {
+      delete[] atual->pedido.pratos[i];
+    }
+    delete[] atual->pedido.pratos;
+    delete[] atual->pedido.quantidades;
+    atual = atual->prox;
+  }
+  system("color 01");
+  cout<< "Obrigada por comprar na nossa lanchonete, esperamos que tenha tido uma boa experiência,  volte sempre!";
+  delete LP;            // Liberar memória da lista de pedidos
+  delete[] cardapio[0]; // Liberar memória do cardápio
+  delete[] cardapio[1];
+  delete[] cardapio;
+
 
   system("pause");
 
