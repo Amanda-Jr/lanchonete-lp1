@@ -11,7 +11,7 @@ struct Prato
 
 struct Pedido
 {
-  string id;
+  int id;
   int **pratos;
   int *quantidades;
   int num_pratos;
