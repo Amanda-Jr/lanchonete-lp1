@@ -13,7 +13,6 @@ struct Pedido
 {
   int id;
   int **pratos;
-  int quantidades;
   int num_pratos;
 };
 
@@ -107,7 +106,7 @@ Prato criar_prato(int id, string nome, double preco)
 }
 
 // Função com descritor para exibir o cardápio
-void exibirCardapio(Prato* listaPratos, int qtdePratos)
+void exibirCardapio(Prato *listaPratos, int qtdePratos)
 {
   for (int i = 0; i < qtdePratos; i++)
   {
@@ -116,7 +115,7 @@ void exibirCardapio(Prato* listaPratos, int qtdePratos)
   }
 }
 
-double calcularTotalPedido(Prato * pratos, Pedido pedido)
+double calcularTotalPedido(Prato *pratos, Pedido pedido)
 {
   double total = 0;
   for (int i = 0; i < pedido.num_pratos; i++)
@@ -128,7 +127,7 @@ double calcularTotalPedido(Prato * pratos, Pedido pedido)
   return total;
 }
 
-void exibirPedidoComTotal(Prato* pratos, Pedido pedido)
+void exibirPedidoComTotal(Prato *pratos, Pedido pedido)
 {
   cout << "Pedido #" << pedido.id << ":" << endl;
   for (int i = 0; i < pedido.num_pratos; i++)
@@ -149,7 +148,6 @@ void adicionarPedidoNaLista(ListaPedidos *lista, int cont_clientes)
 
   Nopedido->pedido.num_pratos = item;
   Nopedido->pedido.pratos = new int *[item];
-  Nopedido->pedido.quantidades = item;
 
   for (int i = 0; i < item; i++)
   {
@@ -182,7 +180,7 @@ void adicionarPedidoNaLista(ListaPedidos *lista, int cont_clientes)
   }
 }
 
-void exibirPedidosNaLista(ListaPedidos *lista, Prato* pratos)
+void exibirPedidosNaLista(ListaPedidos *lista, Prato *pratos)
 {
   Nofila *atual = lista->inicio;
   while (atual != NULL)
@@ -221,7 +219,7 @@ void adicionarPedidosNaFila(ListaPedidos *lista, Fila *f)
   }
 }
 
-void exibirPedidosNaFila(Fila *f, Prato * pratos)
+void exibirPedidosNaFila(Fila *f, Prato *pratos)
 {
   Nofila *atual = f->ini;
   while (atual != NULL)
@@ -236,7 +234,7 @@ int main()
   int qtdePratos = 8;
   bool existe_cliente = true;
   int cont_clientes = 1;
-  
+
   Prato p1 = criar_prato(1, "Sandubao", 10);
   Prato p2 = criar_prato(2, "Panqueca de Frango", 10);
   Prato p3 = criar_prato(3, "Panqueca de Carne", 10);
@@ -306,7 +304,7 @@ int main()
   }
 
   cout << "Obrigada por comprar na nossa lanchonete, esperamos que tenha tido uma boa experiencia, volte sempre!" << endl;
-  delete LP;            // Liberar memória da lista de pedidos
+  delete LP; // Liberar memória da lista de pedidos
 
   system("pause");
 
